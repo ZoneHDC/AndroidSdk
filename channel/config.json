@@ -24,12 +24,18 @@
   },
 
   {
-    "is_pack": true,
+    "is_pack": false,
     "name": "mz",
     "sdk_debug": false,
     "package_name": "com.changwan.fkjjxd.mz",
     "app_name": "反恐狙击行动"
+  },
+  {
+    "is_pack": true,
+    "name": "aqy",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.iqiyi",
+    "app_name": "反恐狙击行动"
   }
-
 ]
 

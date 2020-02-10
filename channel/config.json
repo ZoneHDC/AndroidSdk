@@ -1,0 +1,35 @@
+[
+  {
+    "is_pack": false,
+    "name": "sw",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.sw",
+    "app_name": "反恐狙击行动"
+  },
+
+  {
+    "is_pack": false,
+    "name": "swhd",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.swhd",
+    "app_name": "反恐狙击行动"
+  },
+
+  {
+    "is_pack": false,
+    "name": "swrjdt",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.swrjdt",
+    "app_name": "反恐狙击行动"
+  },
+
+  {
+    "is_pack": true,
+    "name": "mz",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.mz",
+    "app_name": "反恐狙击行动"
+  }
+
+]
+

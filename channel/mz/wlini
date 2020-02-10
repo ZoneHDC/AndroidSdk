@@ -1,0 +1,119 @@
+{
+	"package_name": "com.changwan.fkjjxd.mz",
+	"cw_appid": "20200206200516",
+	"cw_channel": "19112912",
+	"td_appid": "F5D0DB19418B413DBDB0D02E225152C7",
+	"channel": "魅族",
+	"ad_appid": "11a908505010",
+
+"splash_ad": [{
+		"cw_position": "181f7046aab9d0389b2e5f332a40a30f",
+		"sdk_position": "39340",
+		"desc": "开屏广告"
+	},
+      	{
+      		"cw_position": "20ec04e5c355d9c6b65689122b7b7344",
+      		"sdk_position": "39340",
+      		"desc": "开屏-全屏视频"
+      	},
+      	{
+      		"cw_position": "20ec04e5c355d9c6b65689122b7b7344",
+      		"sdk_position": "39340",
+      		"desc": "开屏-激励视频"
+      	}
+
+      	],
+
+	"interstitial_ad": [{
+			"cw_position": "100f704c04fe89ad46bd4cc50ea8fd86",
+			"sdk_position": "45995",
+			"desc": "插屏-选项"
+		},
+		{
+			"cw_position": "0a00046d6241b063bdfecea1b915f78c",
+			"sdk_position": "45995",
+			"desc": "插屏-商店"
+		},
+		{
+			"cw_position": "0d6f3f89952583f97108dbb21f81834d",
+			"sdk_position": "45995",
+			"desc": "插屏-换子弹"
+		},
+
+		{
+        			"cw_position": "94a658c1f40d84451b1a124f020ba330",
+        			"sdk_position": "45995",
+        			"desc": "插屏-重新开始"
+
+        },
+        {
+            "cw_position": "049afc5394d414548df09c0394abfc93",
+              "sdk_position": "45995",
+               "desc": "插屏-首页"
+
+         },
+          {
+            "cw_position": "065deeb608f04432f56abfabffb1a61f",
+         	"sdk_position": "45995",
+             "desc": "插屏-回到游戏"
+
+          },
+          {
+                    "cw_position": "94db6009dfc783a20938a1147fc62a86",
+                   	"sdk_position": "45995",
+                    "desc": "插屏-下一关"
+
+              },
+               {
+                     "cw_position": "5017c52f1a5ca01b94885c1b26bbb6cd",
+                     "sdk_position": "45995",
+                       "desc": "插屏-暂停"
+
+                            },
+                   {
+                         "cw_position": "c35c2ca1022240f153cd7acc60d5c2c6",
+                           	"sdk_position": "45995",
+                              "desc": "插屏-成功"
+
+                     },
+                  {
+                     "cw_position": "2fa4cee1d6259890ce9a6eb6206deae6",
+                      "sdk_position": "45995",
+                       "desc": "插屏-失败"
+
+                 }
+	],
+	"banner_ad": {
+		"cw_position": "d10f735226602d37ff4892547ccc0c62",
+		"sdk_position": "67426",
+		"desc": "banner1"
+	},
+	"reward_ad": [{
+			"cw_position": "670f26369f82bd4dead65fdd8c98b500",
+			"sdk_position": "60844",
+			"desc": "激励视频-获取枪支"
+		},
+
+		{
+        		"cw_position": "670f26369f82bd4dead65fdd8c98b500",
+        		"sdk_position": "60844",
+        		"desc": "激励视频-获取1000金币"
+        	}
+	],
+	"fullscreen_ad": [{
+			"cw_position": "91cc55aea474ea8641f1ffd041fa2d16",
+			"sdk_position": "46235",
+			"desc": "全屏视频-失败"
+		},
+		{
+			"cw_position": "b27b3748632e2392cdde06ae0ec4f5a2",
+			"sdk_position": "46235",
+			"desc": "全屏视频-等级提升"
+		},
+		{
+			"cw_position": "fb9e626648ff3ed010eaf198c1b823ef",
+			"sdk_position": "46235",
+			"desc": "全屏视频-新歌曲"
+		}
+	]
+}

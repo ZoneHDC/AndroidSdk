@@ -1,6 +1,6 @@
 [
   {
-    "is_pack": false,
+    "is_pack": true,
     "name": "sw",
     "sdk_debug": false,
     "package_name": "com.changwan.fkjjxd.sw",
@@ -31,11 +31,19 @@
     "app_name": "反恐狙击行动"
   },
   {
-    "is_pack": true,
+    "is_pack": false,
     "name": "aqy",
     "sdk_debug": false,
     "package_name": "com.changwan.fkjjxd.iqiyi",
     "app_name": "反恐狙击行动"
+  },
+  {
+    "is_pack": false,
+    "name": "sogou",
+    "sdk_debug": false,
+    "package_name": "com.changwan.fkjjxd.sogou",
+    "app_name": "反恐狙击行动"
   }
+
 ]
 

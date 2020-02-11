@@ -4,22 +4,33 @@ import java.security.PublicKey;
 
 public class Constants {
 
-    //搜狗
-    public static final String TT_SDK_APPID = "5040573"; //APPID
+//    public static final String TT_SDK_APPID = "5037264";
+//
+//    public static final String TT_SDK_SPLASH_AD_POSITION = "837264935";
+//
+//    public  static  final String TT_SDK_AD_BANNNER_ID = "";
+//
+//    public static final String TT_SDK_AD_INTERSTITIAL_ID = "937264228";
+//
+//    public  static  final String TT_SDK_FULLREARD_ID = "937264061";
+//
+//    public  static  final String TT_SDK_REWARD_ID ="937264093";
 
-    public static final String TT_SDK_SPLASH_AD_POSITION = "836444705"; //SPLASH_ID
+    public static final String TT_SDK_APPID = "5043513";
 
-    public  static final  String TT_SDK_SPLASH_AD_Banner ="936445943";   //IBANNER_ID
+    public static final String TT_SDK_SPLASH_AD_POSITION = "887289779";
 
-    public static final String TT_SDK_AD_INTERSTITIAL_ID = "936445863";   //INTERTATION_AD
+    public  static  final String TT_SDK_AD_BANNNER_ID = "943509203";
 
-    public  static  final  String TT_SDK_REWARF_AD="936445396";    //REARD_AD
+    public static final String TT_SDK_AD_INTERSTITIAL_ID = "943509205";
 
-    public  static  final  String TT_SDK_FULLVIDEO_AD="936445799";
+    public  static  final String TT_SDK_FULLREARD_ID = "943509206";
+
+    public  static  final String TT_SDK_REWARD_ID ="943509208";
 
 
     //爱奇艺参数
-    public  static  final  String AQY_SDK_GAMEID = "9980";
+    public  static  final  String AQY_SDK_GAMEID = "9939";
 
     public static final String MIMO_SDK_SPLASH_AD_POSITIONTEST = "b64b34d7269ba38c27c19ab987c607d6";
 
@@ -31,7 +42,7 @@ public class Constants {
     public static final String MIMO_SDK_AD_INTERSTITIAL_ID_GAME_SETTING = "a4a98af5947bd84e77839c9233a1281d";
 
 
-
+    public static final String AD_REWARDVIDEO_ID = "72ba8354ac9c52ec398e813d0afaa5a2";
 
     private static final String AD_REWARDVIDE_ID_LIFE = "72ba8354ac9c52ec398e813d0afaa5a2";
     private static final String AD_REWARDVIDE_ID_COIN = "f739d5b0ac611997f4a51f8bf3f8ae36";

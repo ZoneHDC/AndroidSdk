@@ -1,5 +1,6 @@
 package com.changwan.fkjjxd.mz;
 
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,18 +11,12 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.bytedance.sdk.openadsdk.TTSplashAd;
-import com.iqiyi.sdk.listener.GamePlatformInitListener;
-import com.iqiyi.sdk.listener.LoginListener;
-import com.iqiyi.sdk.platform.GamePlatform;
-import com.iqiyi.sdk.platform.GameUser;
-import com.iwolong.ads.Constants;
 import com.iwolong.ads.WLSDKManager;
 import com.iwolong.ads.config.TTAdManagerHolder;
 import com.iwolong.ads.network.WLConfigInfo;
@@ -43,17 +38,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends UnityPlayerActivity implements WLSDKManager.OnWLSplashAdLoadedListener{
+
+
+    private static final String TAG = "platform";
     private WeakHandler mHandler;
     private static List<String> mNeedRequestPMSList = new ArrayList<>(); //权限列表
     private FrameLayout mSplashContainer;
-
-    //爱奇艺
-    public static GamePlatform platform;
-    private static final String TAG = "platform";
-
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         PolyProxy.instance().container1 = mUnityPlayer;
         mHandler = new WeakHandler(new WeakHandler.IHandler() {
             @Override
@@ -65,19 +59,24 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
         mSplashContainer = view.findViewById(R.id.splash_container);
         mUnityPlayer.addView(view);
         requestPermission();
-        getExtraInfo();
+
+
+
         //请求响应权限
-        InitIqiyi();
+
+
+        //爱奇艺闪屏
+
+
+       // requestConfig();
     }
 
+    @Override
+    public void onBackPressed() {
+        // TODO Auto-generated method stub
+        Log.i(TAG, "onBackPressed: ssssssss");
 
-    private void getExtraInfo() {
-        Intent intent = getIntent();
-        if(intent == null) {
-            return;
-        }
 
-        WLSDKManager.instance().mIsExpress = intent.getBooleanExtra("is_express", false);
     }
 
     public void requestPermission() {
@@ -99,10 +98,9 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
             checkAndRequestPermissions();
         } else {
             // 如果是Android6.0以下的机器，默认在安装时获得了所有权限，可以直接调用SDK。
-
             initSDK();
             loadSplashAd();
-            InitIqiyi();
+
         }
     }
 
@@ -132,10 +130,8 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
             /**
              * 权限都已经有了，那么直接回调unity，可以直接调用广告sdk。
              */
-
             initSDK();
             loadSplashAd();
-            InitIqiyi();
             requestConfig();
         } else {
 
@@ -203,6 +199,7 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
         });
     }
 
+
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             /**
@@ -238,89 +235,28 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
         return false;
     }
 
-
-    //爱奇艺
-  private  void InitIqiyi(){
-      platform = GamePlatform.getInstance();
-      platform.initPlatform(this, Constants.AQY_SDK_GAMEID, new GamePlatformInitListener() {
-
-          @Override
-          public void onSuccess () {
-              // TODO Auto-generated method stub
-              Log.i(TAG, "onSuccess: ++++");
-              GamePlatform.getInstance().isLaunchFromGameCenter(MainActivity.this);
-
-              platform.addLoginListener(new LoginListener() {
-
-                  @Override
-                  public void exitGame () {
-                      // TODO Auto-generated method stub
-                      //退出游戏时回调
-                      Log.i(TAG, "exitGame: ++++++ssaaaa");
-
-                      finish();
-                      System.exit(0);
-                  }
-
-                  @Override
-                  public void changeAccountCancle () {
-
-                  }
-
-                  @Override
-                  public void changeAccountSuccess (int i, GameUser gameUser) {
-
-                  }
-
-
-                  @Override
-                  public void logout () {
-                      // TODO Auto-generated method stub
-                      //注销帐号时回调
-
-                  }
-
-                  @Override
-                  public void loginResult (int arg0, GameUser arg1) {
-                      // TODO Auto-generated method stub
-                      //登录结果回调
-
-                      platform.initSliderBar(MainActivity.this);
-                      //platform.initSliderBarWithPos(MainActivity.this,-1,40);
-
-                  }
-              });
-
-          }
-
-          @Override
-          public void onFail (String msg) {
-              // TODO Auto-generated method stub
-
-              System.out.println("" + msg);
-
-          }
-      });
-  }
-
-
     private void initSDK() {
-        TTAdManagerHolder.init(MainActivity.this);
-        TTAdManagerHolder.get().requestPermissionIfNecessary(MainActivity.this);
-        WLSDKManager.instance().loadInteractionAd(WLInitialization.instance().getInterstitialIni().get(0).getSdkPosition(),mUnityPlayer, this);
-        WLSDKManager.instance().loadRewardAd(WLInitialization.instance().getRewardIni().get(0).getSdkPosition(), MainActivity.this);
+        //穿山甲sdk初始化
+        TTAdManagerHolder.init(this);
+        TTAdManagerHolder.get().requestPermissionIfNecessary(this);
+        WLSDKManager.instance().loadInteractionAd(WLInitialization.instance().getInterstitialIni().get(0).getSdkPosition(), mUnityPlayer, MainActivity.this);
+//        WLSDKManager.instance().loadBannerAd(MainActivity.this, mUnityPlayer,Constants.TT_SDK_AD_BANNNER_ID );
         WLSDKManager.instance().loadFullRewardAd(WLInitialization.instance().getFullscreenIni().get(0).getSdkPosition(), MainActivity.this);
+        WLSDKManager.instance().loadRewardAd(WLInitialization.instance().getRewardIni().get(0).getSdkPosition(), MainActivity.this);
+        //请求响应权限
     }
-
     private void loadSplashAd() {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                WLSDKManager.instance().loadSplashAd(mSplashContainer, MainActivity.this,MainActivity.this);
+                WLSDKManager.instance().loadSplashAd(mSplashContainer, MainActivity.this);
             }
         }, 5 * 1000);
 
+
+
     }
+
 
     @Override
     public void onSplashAdLoad(TTSplashAd ad) {
@@ -333,15 +269,6 @@ public class MainActivity extends UnityPlayerActivity implements WLSDKManager.On
             //设置不开启开屏广告倒计时功能以及不显示跳过按钮,如果这么设置，您需要自定义倒计时逻辑
             //ad.setNotAllowSdkCountdown();
         }
+
     }
-
-    @Override
-    public void onBackPressed() {
-        // TODO Auto-generated method stub
-        Log.i(TAG, "onBackPressed: ssssssss");
-
-        platform.iqiyiUserLogin(this);
-//        platform.iqiyiUserLogout(MainActivity.this);
-    }
-
 }

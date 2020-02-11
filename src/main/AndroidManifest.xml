@@ -34,8 +34,9 @@
       android:theme="@style/UnityThemeSelector"
       android:icon="@mipmap/app_icon"
       android:label="@string/app_name">
+
     <activity
-        android:label="@string/app_name"
+
         android:screenOrientation="landscape"
         android:launchMode="singleTop"
         android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
@@ -49,7 +50,9 @@
       <meta-data android:name="android.notch_support" android:value="true" />
     </activity>
 
-    <provider
+
+
+      <provider
         android:name="com.bytedance.sdk.openadsdk.TTFileProvider"
         android:authorities="${applicationId}.TTFileProvider"
         android:exported="false"

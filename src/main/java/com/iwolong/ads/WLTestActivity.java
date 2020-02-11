@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-
 import com.iwolong.ads.utils.WLInitialization;
 import com.iwolong.ads.utils.WLTools;
 
@@ -44,5 +43,4 @@ public class WLTestActivity extends Activity {
         });
         dlg.show();
     }
-
 }

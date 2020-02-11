@@ -1,14 +1,16 @@
 package com.iwolong.ads;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.support.annotation.MainThread;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.support.annotation.MainThread;
+import com.bytedance.sdk.openadsdk.TTSplashAd;
+
+
+import com.iwolong.ads.utils.WLLogUtils;
 
 import com.bytedance.sdk.openadsdk.AdSlot;
 import com.bytedance.sdk.openadsdk.FilterWord;
@@ -20,15 +22,12 @@ import com.bytedance.sdk.openadsdk.TTAppDownloadListener;
 import com.bytedance.sdk.openadsdk.TTFullScreenVideoAd;
 import com.bytedance.sdk.openadsdk.TTNativeExpressAd;
 import com.bytedance.sdk.openadsdk.TTRewardVideoAd;
-import com.bytedance.sdk.openadsdk.TTSplashAd;
-import com.iqiyi.sdk.platform.GamePlatform;
 import com.iwolong.ads.config.TTAdManagerHolder;
 import com.iwolong.ads.dialog.DislikeDialog;
 import com.iwolong.ads.network.WLData;
-import com.iwolong.ads.utils.UIUtils;
 import com.iwolong.ads.utils.WLInitialization;
-import com.iwolong.ads.utils.WLLogUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +35,11 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.iwolong.ads.unity.PolyProxy.callbackUnity;
-import static com.iwolong.ads.unity.PolyProxy.sActivity;
 
 public class WLSDKManager {
     private static WLSDKManager sManager = new com.iwolong.ads.WLSDKManager();
     private  static  final String TAG= "VIDEO";
-    private WLSDKManager () {}
+    private WLSDKManager() {}
     public static WLSDKManager instance() {
         return sManager;
     }
@@ -63,26 +61,17 @@ public class WLSDKManager {
     private TTAdNative mTTAdNativeReward;
     private TTRewardVideoAd mttRewardVideoAd;
     private boolean mHasShowDownloadActiveRward = false;
+
     private Map<String, Queue<TTRewardVideoAd>> mttRewardVideoAdQueue=new HashMap<>();
+
+    private FrameLayout mSplashContainer;
+    private static final int AD_TIME_OUT = 30000;
+
 
     //全屏视频
     private TTAdNative mTTAdNativeFullReward;
     private TTFullScreenVideoAd mttFullVideoAd;
     private  Map<String, Queue<TTFullScreenVideoAd>> mttFullVideoAdQueue =new HashMap<>();
-
-    //开屏
-    private TTAdNative mTTAdNative;
-    private FrameLayout mSplashContainer;
-    //是否强制跳转到主页面
-    private boolean mForceGoMain;
-
-    //开屏广告加载超时时间,建议大于3000,这里为了冷启动第一次加载到广告并且展示,示例设置了3000ms
-    private static final int AD_TIME_OUT = 3000;
-    private static final int MSG_GO_MAIN = 1;
-    //开屏广告是否已经加载
-    private boolean mHasLoaded;
-
-    public boolean mIsExpress = false; //是否请求模板广告
 
     public void showBanner(final Activity activity, final ViewGroup container, final String position) {
         activity.runOnUiThread(new Runnable() {
@@ -92,10 +81,12 @@ public class WLSDKManager {
 
                 WLData wldata = WLInitialization.instance().getWLData();
 
+                //wldata为空时，可能是网络或我们服务器存在问题，所以当wldata为空时，需要显示广告
                 if (wldata != null && !wldata.isDisplayAd(position)) {
+
                     return;
                 }
-                loadBannerAd(activity,container, WLInitialization.instance().getBannerAdId());
+                loadBannerAd(activity,container,WLInitialization.instance().getBannerAdId());
 
             }
         });
@@ -108,7 +99,7 @@ public class WLSDKManager {
                 .setCodeId(position) //广告位id
                 .setSupportDeepLink(true)
                 .setAdCount(1) //请求广告数量为1到3条
-                .setExpressViewAcceptedSize(300,50) //期望模板广告view的size,单位dp
+                .setExpressViewAcceptedSize(280,40) //期望模板广告view的size,单位dp
                 .setImageAcceptedSize(640,320 )//这个参数设置即可，不影响模板广告的size
                 .build();
         //step5:请求广告，对请求回调的广告作渲染处理
@@ -124,23 +115,42 @@ public class WLSDKManager {
                     return;
                 }
                 mTTAd = ads.get(0);
-                mTTAd.setSlideIntervalTime(15*1000);
+//                mTTAd.setSlideIntervalTime(30*1000);
+               // mTTAd.setSlideIntervalTime(10*1000);
                 bindAdListener(mTTAd,container,activity);
+
 
                 mTTAd.render();
             }
+
+
+
+
         });
     }
 
     private boolean mHasShowDownloadActive1 = false;
+    List<View> list=new ArrayList<View>();
 
-    private void bindAdListener(TTNativeExpressAd ad, final ViewGroup container, final Activity activity) {
+    private void clearList(ViewGroup container){
+        if(list!=null){
+            for(int i=0;i<list.size();i++){
+                container.removeView(list.get(i));
+            }
+            list.clear();
+
+        }
+
+    }
+
+    private void bindAdListener(TTNativeExpressAd ad,final ViewGroup container,final Activity activity) {
         ad.setExpressInteractionListener(new TTNativeExpressAd.ExpressAdInteractionListener() {
             @Override
             public void onAdClicked(View view, int type) {
-                callbackUnity("BannerClose", "", "");
-                container.removeViewAt(1);
 
+              //  container.removeViewAt(1);
+               // container.removeView(view);
+                clearList(container);
             }
 
             @Override
@@ -156,12 +166,23 @@ public class WLSDKManager {
             @Override
             public void onRenderSuccess(View view, float width, float height) {
 
+                clearList(container);
+                list.add(view);
+
                 //返回view的宽高 单位 dp
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(Math.round(activity.getResources().getDisplayMetrics().density * 300), Math.round(activity.getResources().getDisplayMetrics().density * 50)
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(Math.round(activity.getResources().getDisplayMetrics().density * 280), Math.round(activity.getResources().getDisplayMetrics().density * 40)
                 );
                 layoutParams.gravity = Gravity.BOTTOM| Gravity.CENTER_HORIZONTAL;
+////                       layoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+////                        layoutParams.gravity = Gravity.BOTTOM;
+//               layoutParams.leftMargin=250;
+//               layoutParams.rightMargin=250;
 
-                container.addView(view,1,layoutParams);
+               // container.addView(view,1,layoutParams);
+
+
+                container.addView(view,layoutParams);
+
             }
         });
         //dislike设置
@@ -205,7 +226,7 @@ public class WLSDKManager {
         });
     }
     // 按钮事件绑定
-    private void bindDislike(TTNativeExpressAd ad, boolean customStyle, final Activity activity, final ViewGroup container) {
+    private void bindDislike(TTNativeExpressAd ad, boolean customStyle,final Activity activity,final ViewGroup container) {
 
         if (customStyle) {
             //使用自定义样式
@@ -219,9 +240,11 @@ public class WLSDKManager {
                 @Override
                 public void onItemClick(FilterWord filterWord) {
                     //屏蔽广告
-                    callbackUnity("BannerClose", "", "");
+                    Log.i(TAG,"关闭1");
                     //用户选择不喜欢原因后，移除广告展示
-                    container.removeViewAt(1);
+                  //  container.removeViewAt(1);
+                   // container.removeView(ad.getExpressAdView());
+                    clearList(container);
                 }
             });
             ad.setDislikeDialog(dislikeDialog);
@@ -231,14 +254,17 @@ public class WLSDKManager {
         ad.setDislikeCallback(activity, new TTAdDislike.DislikeInteractionCallback() {
             @Override
             public void onSelected(int position, String value) {
-                callbackUnity("BannerClose", "", "");
+
                 //用户选择不喜欢原因后，移除广告展示
-                container.removeViewAt(1);
+                Log.i(TAG,"关闭2");
+             //   container.removeViewAt(1);
+               // container.removeView(ad.getExpressAdView());
+                clearList(container);
             }
 
             @Override
             public void onCancel() {
-
+                Log.i(TAG,"关闭3");
             }
         });
     }
@@ -252,7 +278,7 @@ public class WLSDKManager {
             public void run() {
                 final WLData wldata = WLInitialization.instance().getWLData();
 
-                if (wldata != null && !wldata.isDisplayAd(position)) {
+                if (wldata == null || !wldata.isDisplayAd(position)) {
                     return;
                 }
                 String positionId= WLInitialization.instance().getInterstitialAdId(position);
@@ -264,7 +290,7 @@ public class WLSDKManager {
     }
     // 初始化插屏广告
     public void loadInteractionAd(final String position,final ViewGroup containers,final Activity activity) {
-
+        Log.i(TAG,"调用加载插屏");
         TTAdNative mTTAdNativeInter = TTAdManagerHolder.get().createAdNative(activity);
         AdSlot adSlot = new AdSlot.Builder()
                 .setCodeId(position) //广告位id
@@ -288,7 +314,7 @@ public class WLSDKManager {
 
                     return;
                 }
-
+                Log.i(TAG,"插屏加载成功");
                 adsItem=ads;
 //                Random rand = new Random();
 //                int i = rand.nextInt(2);
@@ -312,9 +338,9 @@ public class WLSDKManager {
         }
     }
 
-
+    
     //按钮事件的监听
-    private void bindAdListener(final TTNativeExpressAd ad, final Activity activity, final ViewGroup container, final String position) {
+    private void bindAdListener(final TTNativeExpressAd ad,final Activity activity,final ViewGroup container,final String position) {
         ad.setExpressInteractionListener(new TTNativeExpressAd.AdInteractionListener() {
             @Override
             public void onAdDismiss() {
@@ -352,43 +378,6 @@ public class WLSDKManager {
         });
 
 
-        if (ad.getInteractionType() != TTAdConstant.INTERACTION_TYPE_DOWNLOAD){
-            return;
-        }
-        ad.setDownloadListener(new TTAppDownloadListener() {
-            @Override
-            public void onIdle() {
-
-            }
-
-            @Override
-            public void onDownloadActive(long totalBytes, long currBytes, String fileName, String appName) {
-                if (!mHasShowDownloadActive) {
-                    mHasShowDownloadActive = true;
-
-                }
-            }
-
-            @Override
-            public void onDownloadPaused(long totalBytes, long currBytes, String fileName, String appName) {
-
-            }
-
-            @Override
-            public void onDownloadFailed(long totalBytes, long currBytes, String fileName, String appName) {
-
-            }
-
-            @Override
-            public void onInstalled(String fileName, String appName) {
-
-            }
-
-            @Override
-            public void onDownloadFinished(long totalBytes, String fileName, String appName) {
-
-            }
-        });
     }
 
 
@@ -396,36 +385,33 @@ public class WLSDKManager {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
+             //   Log.i(TAG,"播放激励视频");
                 WLData wldata = WLInitialization.instance().getWLData();
+                //wldata为空时，可能是网络或我们服务器存在问题，所以当wldata为空时，需要显示广告
                 if (wldata != null && !wldata.isDisplayAd(position)) {
+                   // Log.i(TAG,"激励视频播放为false");
                     return;
                 }
-//                if (mttRewardVideoAd != null) {
-//                    //step6:在获取到广告后展示
-//                    //该方法直接展示广告
-////                    mttRewardVideoAd.showRewardVideoAd(RewardVideoActivity.this);
-//
-//                    //展示广告，并传入广告展示的场景
-//                    mttRewardVideoAd.showRewardVideoAd(activity,TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
-//                    mttRewardVideoAd = null;
-//                }
+
                 String codeId = WLInitialization.instance().getRewardAdId(position);
                 Queue<TTRewardVideoAd> queue = mttRewardVideoAdQueue.get(codeId);
 
                 if (queue != null && queue.size() > 0) {
                     TTRewardVideoAd ttad = queue.poll();;
-                    ttad.showRewardVideoAd(activity, TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
+                    ttad.showRewardVideoAd(activity,TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
                 } else {
                     loadRewardAd(codeId, activity, false);
                 }
+
             }
         });
     }
 
+    // 初始化 激励视频
     public void loadRewardAd(final String position,final Activity activity, boolean add2Queue) {
         TTAdManager ttAdManager = TTAdManagerHolder.get();
         TTAdManagerHolder.get().requestPermissionIfNecessary(activity);
+        Log.i(TAG,"激励视频开始缓存");
         mTTAdNativeReward = ttAdManager.createAdNative(activity);
         //step4:创建广告请求参数AdSlot,具体参数含义参考文档
         AdSlot adSlot = new AdSlot.Builder()
@@ -449,19 +435,21 @@ public class WLSDKManager {
             //视频广告加载后，视频资源缓存到本地的回调，在此回调后，播放本地视频，流畅不阻塞。
             @Override
             public void onRewardVideoCached() {
+                Log.i(TAG,"激励视频缓存成功");
 
             }
+
             //视频广告的素材加载完毕，比如视频url等，在此回调后，可以播放在线视频，网络不好可能出现加载缓冲，影响体验。
             @Override
             public void onRewardVideoAdLoad(TTRewardVideoAd ad) {
 
-//                mttRewardVideoAd = ad;
+              //  mttRewardVideoAd = ad;
                 ad.setRewardAdInteractionListener(new TTRewardVideoAd.RewardAdInteractionListener() {
 
                     @Override
                     public void onAdShow() {
                         loadRewardAd(position,activity);
-                        loadSplasAdIfNeed("20ec04e5c355d9c6b65689122b7b7344",activity);
+                        loadSplasAdIfNeed("20ec04e5c355d9c6b65689122b7b7344");
                     }
 
                     @Override
@@ -506,43 +494,48 @@ public class WLSDKManager {
 
                     queue.offer(ad);
                 } else {
-                    ad.showRewardVideoAd(activity, TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
+                    ad.showRewardVideoAd(activity,TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
                 }
+
+
+
+
+
             }
         });
     }
-
-    // 初始化 激励视频
     public void loadRewardAd(final String position,final Activity activity) {
         loadRewardAd(position, activity, true);
     }
 
-
-    public void fullRewardAd(final Activity activity,final String postion){
+    public void fullRewardAd(final Activity activity,final String position){
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
                 WLData wldata = WLInitialization.instance().getWLData();
-                if (wldata != null && !wldata.isDisplayAd(postion)) {
-                   return;
-                }
+                if (wldata != null && !wldata.isDisplayAd(position)) {
 
-                String codeId = WLInitialization.instance().getFullscreenAdId(postion);
+                    return;
+                }
+                String codeId = WLInitialization.instance().getFullscreenAdId(position);
                 Queue<TTFullScreenVideoAd> queue = mttFullVideoAdQueue.get(codeId);
 
                 if (queue != null && queue.size() > 0) {
                     TTFullScreenVideoAd ttad = queue.poll();;
-                    ttad.showFullScreenVideoAd(activity, TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
+                    ttad.showFullScreenVideoAd(activity,TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
                 } else {
                     loadFullRewardAd(codeId, activity, false);
                 }
+
+
+
 
             }
         });
     }
 
-    public  void loadFullRewardAd(final  String position,final  Activity activity,boolean add2Queue){
+    public void loadFullRewardAd(final String position,final Activity activity,boolean add2Queue) {
         //step4:创建广告请求参数AdSlot,具体参数含义参考文档
         TTAdManager ttAdManager = TTAdManagerHolder.get();
         mTTAdNativeFullReward = ttAdManager.createAdNative(activity);
@@ -568,7 +561,7 @@ public class WLSDKManager {
                     @Override
                     public void onAdShow() {
                         loadFullRewardAd(position,activity);
-                        loadSplasAdIfNeed("20ec04e5c355d9c6b65689122b7b7344",activity);
+                        loadSplasAdIfNeed("20ec04e5c355d9c6b65689122b7b7344");
                     }
 
                     @Override
@@ -578,7 +571,6 @@ public class WLSDKManager {
 
                     @Override
                     public void onAdClose() {
-
 
 
                     }
@@ -601,9 +593,11 @@ public class WLSDKManager {
                     }
                     queue.offer(ad);
                 } else {
-                    ad.showFullScreenVideoAd(activity, TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
+                    ad.showFullScreenVideoAd(activity,TTAdConstant.RitScenes.CUSTOMIZE_SCENES,"scenes_test");
                 }
+
             }
+
             @Override
             public void onFullScreenVideoCached() {
 
@@ -618,42 +612,24 @@ public class WLSDKManager {
     /**
      * 加载开屏广告
      */
-    public void loadSplashAd(FrameLayout container, OnWLSplashAdLoadedListener loadedListener,Activity activity){
+    public void loadSplashAd(FrameLayout container, OnWLSplashAdLoadedListener loadedListener) {
         if (mSplashContainer == null) {
-           mSplashContainer = container;
-//            mSplashContainer = (FrameLayout) PolyProxy.getActivity().getLayoutInflater().inflate(R.layout.activity_splashclose, null);
+            mSplashContainer = container;
         }
 
         TTAdNative ttAdNative = TTAdManagerHolder.get().createAdNative(container.getContext());
-
         //step3:创建开屏广告请求参数AdSlot,具体参数含义参考文档
-        AdSlot adSlot = null;
-        if (mIsExpress) {
-            //个性化模板广告需要传入期望广告view的宽、高，单位dp，请传入实际需要的大小，
-            //比如：广告下方拼接logo、适配刘海屏等，需要考虑实际广告大小
-            float expressViewWidth = UIUtils.getScreenWidthDp(activity);
-            float expressViewHeight = UIUtils.getHeight(activity);
-            adSlot = new AdSlot.Builder()
-                    .setCodeId(WLInitialization.instance().getSplashIni().get(0).getSdkPosition())
-                    .setSupportDeepLink(true)
-                    .setImageAcceptedSize(1080, 1920)
-                    //模板广告需要设置期望个性化模板广告的大小,单位dp,代码位是否属于个性化模板广告，请在穿山甲平台查看
-                    .setExpressViewAcceptedSize(expressViewWidth, expressViewHeight)
-                    .build();
-        } else {
-            adSlot = new AdSlot.Builder()
-                    .setCodeId(WLInitialization.instance().getSplashIni().get(0).getSdkPosition())
-                    .setSupportDeepLink(true)
-                    .setImageAcceptedSize(1080, 1920)
-                    .build();
-        }
-
+        AdSlot adSlot = new AdSlot.Builder()
+                .setCodeId(WLInitialization.instance().getSplashIni().get(0).getSdkPosition())
+                .setSupportDeepLink(true)
+                .setImageAcceptedSize(1080, 1920)
+                .build();
         //step4:请求广告，调用开屏广告异步请求接口，对请求回调的广告作渲染处理
         ttAdNative.loadSplashAd(adSlot, new TTAdNative.SplashAdListener() {
             @Override
             @MainThread
             public void onError(int code, String message) {
-                Log.i(TAG, "onError: "+code+" "+message);
+                WLLogUtils.d(message);
             }
 
             @Override
@@ -702,14 +678,14 @@ public class WLSDKManager {
         }, AD_TIME_OUT);
     }
 
-    public void loadSplasAdIfNeed(String position1,Activity activity) {
+    public void loadSplasAdIfNeed(String position1) {
+
         WLData wldata = WLInitialization.instance().getWLData();
-        String position = WLInitialization.instance().getAdSDKSplashId(position1);
+        String position = WLInitialization.instance().getSplashIni().get(0).getSdkPosition();
         //wldata为空时，可能是网络或我们服务器存在问题，所以当wldata为空时，这里需要仍然需要加下控制，不显示广告
         if (wldata == null || !wldata.isDisplayAd(position1)) {
             return;
         }
-
         if (mSplashContainer != null) {
             loadSplashAd(mSplashContainer, new OnWLSplashAdLoadedListener() {
                 @Override
@@ -724,7 +700,7 @@ public class WLSDKManager {
                         //ad.setNotAllowSdkCountdown();
                     }
                 }
-            },activity);
+            });
         }
     }
 
@@ -734,8 +710,6 @@ public class WLSDKManager {
 
     public void exitGame(Activity activity) {
 
-        GamePlatform platforms = GamePlatform.getInstance();
-        platforms.iqiyiUserLogout(activity);
     }
 
 
